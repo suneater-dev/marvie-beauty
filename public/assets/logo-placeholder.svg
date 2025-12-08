@@ -1,0 +1,12 @@
+<svg width="300" height="80" viewBox="0 0 300 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="300" height="80" fill="transparent"/>
+
+  <!-- Elegant M icon -->
+  <path d="M20 60V25L35 40L50 25V60" stroke="#D9C7B0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Text: MARVIE BEAUTY -->
+  <text x="70" y="45" font-family="Jost, sans-serif" font-size="24" font-weight="600" fill="#475161" letter-spacing="0.05em">
+    MARVIE BEAUTY
+  </text>
+</svg>
