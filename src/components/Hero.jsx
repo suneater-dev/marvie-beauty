@@ -105,7 +105,7 @@ const Hero = ({ onBookingClick }) => {
         </p>
 
         {/* Headline */}
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in-up tracking-wide drop-shadow-2xl">
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in-up tracking-wide drop-shadow-2xl" style={{ fontFamily: 'Zagora, sans-serif' }}>
           MARVIE BEAUTY
         </h1>
 
