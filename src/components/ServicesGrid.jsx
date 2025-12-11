@@ -13,9 +13,11 @@
  * - Update service content in the services array below
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import Modal from './Modal';
 
 const ServicesGrid = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const services = [
     {
       id: 1,
@@ -124,7 +126,66 @@ const ServicesGrid = () => {
             </article>
           ))}
         </div>
+
+        {/* View Full Menu Button */}
+        <div className="text-center mt-12">
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="px-10 py-4 bg-primary text-white font-semibold rounded-sm uppercase tracking-wider text-sm hover:bg-accent hover:text-primary transition-all duration-300 shadow-lg hover:shadow-xl"
+          >
+            View Full Treatment Menu & Pricelist
+          </button>
+        </div>
       </div>
+
+      {/* Full Treatment Menu Modal */}
+      <Modal
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        title="Full Treatment Menu & Pricelist"
+        size="lg"
+      >
+        <div className="space-y-6">
+          {/* Placeholder for PDF/Image - Replace with actual menu */}
+          <div className="bg-bg rounded-lg p-12 text-center border-2 border-dashed border-gray-300 min-h-[400px] flex flex-col items-center justify-center">
+            <svg
+              className="w-24 h-24 mx-auto mb-6 text-muted"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <p className="text-primary font-semibold text-xl mb-3">Treatment Menu Coming Soon</p>
+            <p className="text-muted text-sm max-w-md">
+              This will display the complete treatment menu with all services and pricing.
+              <br />
+              Add your menu image or PDF to display it here.
+            </p>
+          </div>
+
+          {/* Example: Uncomment when you have the actual image
+          <img
+            src="/assets/treatment-menu.jpg"
+            alt="Full Treatment Menu"
+            className="w-full rounded-lg shadow-lg"
+          />
+          */}
+
+          {/* Example: For PDF viewer
+          <iframe
+            src="/assets/treatment-menu.pdf"
+            className="w-full h-[700px] rounded-lg border"
+            title="Treatment Menu PDF"
+          />
+          */}
+        </div>
+      </Modal>
     </section>
   );
 };

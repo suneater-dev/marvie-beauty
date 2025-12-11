@@ -13,7 +13,13 @@
 
 import React, { useEffect, useRef } from 'react';
 
-const Modal = ({ isOpen, onClose, title, children }) => {
+const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
+  const sizeClasses = {
+    md: 'max-w-lg',
+    lg: 'max-w-3xl',
+    xl: 'max-w-5xl',
+    full: 'max-w-7xl',
+  };
   const modalRef = useRef(null);
   const previousActiveElement = useRef(null);
 
@@ -107,10 +113,10 @@ const Modal = ({ isOpen, onClose, title, children }) => {
       <div
         ref={modalRef}
         tabIndex={-1}
-        className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-lg
+        className={`relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full ${sizeClasses[size]}
                    max-h-[90vh] overflow-y-auto
                    animate-slide-up sm:animate-fade-in
-                   focus:outline-none"
+                   focus:outline-none`}
       >
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">

@@ -22,7 +22,7 @@ export const About = () => {
           <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-wide uppercase">
             About Marvie Beauty
           </h2>
-          <div className="text-lg text-gray-300 leading-relaxed space-y-4 font-light">
+          <div className="text-lg text-gray-300 leading-relaxed space-y-6 font-light max-w-3xl mx-auto text-center">
             <p>
               Marvie Beauty Clinic is a modern aesthetic space specializing in skin treatments, face contouring, and body contouring. Our approach is safe, personalized, and results-focused, designed to elevate your natural beauty with refined precision.
             </p>
