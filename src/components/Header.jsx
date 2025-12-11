@@ -88,7 +88,7 @@ const Header = ({ onBookingClick }) => {
         {/* Logo */}
         <a
           href="#home"
-          className="flex items-center transition-opacity duration-300 hover:opacity-80"
+          className="flex items-center gap-3 transition-opacity duration-300 hover:opacity-80"
           onClick={(e) => handleNavClick(e, '#home')}
         >
           <img
@@ -96,6 +96,12 @@ const Header = ({ onBookingClick }) => {
             alt="Marvie Beauty logo"
             className="h-12 md:h-14 w-auto transition-all duration-300"
           />
+          <span
+            className="text-white text-xl md:text-2xl font-bold tracking-wider"
+            style={{ fontFamily: 'Zagora, sans-serif' }}
+          >
+            MARVIE BEAUTY
+          </span>
         </a>
 
         {/* Desktop Navigation */}
