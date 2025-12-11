@@ -24,17 +24,13 @@ export const About = () => {
           </h2>
           <div className="text-lg text-gray-300 leading-relaxed space-y-4 font-light">
             <p>
-              Marvie Beauty is a modern aesthetic clinic dedicated to delivering results-driven
-              skincare and beauty treatments. Our approach focuses on natural enhancement,
-              professional care, and a calming client experience.
+              Marvie Beauty Clinic is a modern aesthetic space specializing in skin treatments, face contouring, and body contouring. Our approach is safe, personalized, and results-focused, designed to elevate your natural beauty with refined precision.
             </p>
             <p>
-              Every treatment is performed by certified practitioners using clinically approved
-              technology and premium products. We believe beauty should feel effortless.
+              With over 2,000 clients cared for, we continue to uphold high standards of quality, comfort, and advanced aesthetic technology.
             </p>
             <p>
-              Our goal is to provide treatments that help clients gain confidence while maintaining
-              a soft, natural look.
+              Located in Jakarta and Bali, Marvie Beauty Clinic offers seamless access to premium treatments and a serene, elevated experience.
             </p>
           </div>
         </div>

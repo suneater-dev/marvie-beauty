@@ -38,10 +38,9 @@ const Hero = ({ onBookingClick }) => {
     },
   ];
 
-  // WhatsApp configuration
-  // UPDATE THIS: Replace with actual WhatsApp number in international format (e.g., +628123456789)
-  const WHATSAPP_NUMBER = '+628xxxxxxxxxx';
-  const WHATSAPP_MESSAGE = 'Hi, I would like to inquire about your services at Marvie Beauty.';
+  // WhatsApp Business configuration
+  const WHATSAPP_NUMBER = '+6287729138734';
+  const WHATSAPP_MESSAGE = 'Hi, I would like to book an appointment at Marvie Beauty.';
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
 
   // Auto-play slider
@@ -57,6 +56,13 @@ const Hero = ({ onBookingClick }) => {
     const servicesSection = document.querySelector('#services');
     if (servicesSection) {
       servicesSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleScrollToContact = () => {
+    const contactSection = document.querySelector('#contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -123,12 +129,6 @@ const Hero = ({ onBookingClick }) => {
           className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16"
           style={{ animationDelay: '0.4s' }}
         >
-          <button
-            onClick={onBookingClick}
-            className="btn-primary text-lg px-8 py-4 w-full sm:w-auto shadow-2xl"
-          >
-            Book Appointment
-          </button>
           <a
             href={whatsappUrl}
             target="_blank"
@@ -137,8 +137,16 @@ const Hero = ({ onBookingClick }) => {
                      hover:bg-white hover:text-primary text-lg px-8 py-4 w-full sm:w-auto
                      inline-block text-center shadow-2xl"
           >
-            Contact Us
+            Book Appointment
           </a>
+          <button
+            onClick={handleScrollToContact}
+            className="btn-secondary bg-white/10 backdrop-blur-sm border-white text-white
+                     hover:bg-white hover:text-primary text-lg px-8 py-4 w-full sm:w-auto
+                     shadow-2xl"
+          >
+            Contact Us
+          </button>
         </div>
 
         {/* Navigation Dots */}

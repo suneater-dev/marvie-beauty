@@ -21,42 +21,42 @@ const ServicesGrid = () => {
       id: 1,
       title: 'Facial Treatments',
       description:
-        'Deep-cleansing, hydrating, and rejuvenating facials designed to restore skin clarity and glow. Tailored to each skin type for visible, lasting results.',
+        'Medically guided facial treatments designed to improve skin health, function, and appearance. Customized protocols combining targeted techniques with medical-grade formulations for clearer, smoother, and more resilient skin.',
       image: '/assets/service-1.webp',
     },
     {
       id: 2,
-      title: 'Acne & Skin Repair',
+      title: 'Acne Skin Treatment',
       description:
-        'Targeted treatments to reduce breakouts, minimize scarring, and improve overall skin texture. Ideal for sensitive and acne-prone skin.',
+        'Clear, calm, and confident—our medically guided acne treatments target breakouts at the source. Using advanced protocols to reduce acne, prevent future flare-ups, and restore healthy, smooth skin.',
       image: '/assets/service-2.webp',
     },
     {
       id: 3,
       title: 'Anti-Aging Solutions',
       description:
-        'Non-invasive procedures focused on tightening, lifting, and revitalizing the skin. Helps reduce fine lines, wrinkles, and signs of aging.',
+        'Advanced anti-aging treatments including Botox, Dermal Fillers, Threadlift, and Skin Boosters. Restore youthful contours, smooth wrinkles, and rejuvenate your skin with natural-looking, long-lasting results.',
       image: '/assets/service-3.webp',
     },
     {
       id: 4,
-      title: 'Injectables (Non-Surgical Enhancements)',
+      title: 'Face Contouring Solutions',
       description:
-        'Professional injectable treatments that enhance facial features while maintaining a natural appearance. Safe, subtle, and performed by qualified experts.',
+        'Sculpt. Define. Enhance. Using Botox, Dermal Fillers, and Thread Treatments to refine facial features, restore balance, and create natural, elegant contours tailored to your unique facial structure.',
       image: '/assets/service-4.webp',
     },
     {
       id: 5,
-      title: 'Laser Hair Removal',
+      title: 'Laser Solutions',
       description:
-        'Smooth, long-lasting hair reduction using advanced laser technology suitable for various skin types.',
+        'Target, transform, and reveal radiant skin. Utilizing Pico Laser and DPL Laser to address pigmentation, acne scars, uneven skin tone, and hair removal with precision and safety.',
       image: '/assets/service-5.webp',
     },
     {
       id: 6,
-      title: 'Body Contouring',
+      title: 'Body Contouring Solutions',
       description:
-        'Non-surgical sculpting solutions that reduce stubborn fat and improve body shape with minimal downtime.',
+        'Redefine your silhouette with medically guided treatments using Botox and Dermal Fillers. Target stubborn areas, enhance curves, and sculpt a harmonious, natural-looking body shape.',
       image: '/assets/service-6.webp',
     },
   ];

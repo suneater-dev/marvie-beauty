@@ -21,6 +21,11 @@ const Header = ({ onBookingClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // WhatsApp Business configuration
+  const WHATSAPP_NUMBER = '+6287729138734';
+  const WHATSAPP_MESSAGE = 'Hi, I would like to book an appointment at Marvie Beauty.';
+  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+
   // Handle scroll to detect when header should become solid
   // Threshold: 20px - adjust this value to change when header transitions
   useEffect(() => {
@@ -113,12 +118,14 @@ const Header = ({ onBookingClick }) => {
         </ul>
 
         {/* Desktop CTA Button */}
-        <button
-          onClick={onBookingClick}
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
           className="hidden md:block px-8 py-3 bg-accent text-primary font-semibold rounded-sm uppercase tracking-wider text-sm hover:bg-accent-dark hover:shadow-lg transition-all duration-300"
         >
           Book Appointment
-        </button>
+        </a>
 
         {/* Mobile Menu Button */}
         <button
@@ -168,17 +175,17 @@ const Header = ({ onBookingClick }) => {
             </li>
           ))}
           <li role="none">
-            <button
-              onClick={() => {
-                setIsMenuOpen(false);
-                onBookingClick();
-              }}
-              className="w-full px-8 py-3 bg-accent text-primary font-semibold rounded-sm uppercase tracking-wider text-sm hover:bg-accent-dark hover:shadow-lg transition-all duration-300"
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsMenuOpen(false)}
+              className="block w-full px-8 py-3 bg-accent text-primary font-semibold rounded-sm uppercase tracking-wider text-sm hover:bg-accent-dark hover:shadow-lg transition-all duration-300 text-center"
               role="menuitem"
               tabIndex={isMenuOpen ? 0 : -1}
             >
               Book Appointment
-            </button>
+            </a>
           </li>
         </ul>
       </div>
