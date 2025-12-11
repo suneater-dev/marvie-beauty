@@ -16,8 +16,7 @@ import React from 'react';
 
 const FloatingWhatsApp = () => {
   // WhatsApp configuration
-  // UPDATE THIS: Replace with actual WhatsApp number in international format (e.g., +628123456789)
-  const WHATSAPP_NUMBER = '+628xxxxxxxxxx';
+  const WHATSAPP_NUMBER = '+6287729138734';
   const WHATSAPP_MESSAGE = 'Hi, I would like to inquire about your services at Marvie Beauty.';
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
 
