@@ -96,10 +96,7 @@ const Header = ({ onBookingClick }) => {
             alt="Marvie Beauty logo"
             className="h-12 md:h-14 w-auto transition-all duration-300"
           />
-          <span
-            className="text-white text-xl md:text-2xl font-bold tracking-wider"
-            style={{ fontFamily: 'Zagora, sans-serif' }}
-          >
+          <span className="text-white text-xl md:text-2xl font-bold tracking-wider">
             MARVIE BEAUTY
           </span>
         </a>
