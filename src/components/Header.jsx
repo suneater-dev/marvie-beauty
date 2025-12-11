@@ -11,7 +11,7 @@
  * - Full keyboard accessibility
  *
  * HOW TO CUSTOMIZE:
- * - Replace logo path at line ~90: /assets/logo-placeholder.svg
+ * - Logo updated to /marvie-logo.png (line ~95)
  * - Adjust scroll threshold at line ~30 (default: 20px)
  */
 
@@ -92,9 +92,9 @@ const Header = ({ onBookingClick }) => {
           onClick={(e) => handleNavClick(e, '#home')}
         >
           <img
-            src="/assets/logo-placeholder.svg"
+            src="/marvie-logo.png"
             alt="Marvie Beauty logo"
-            className="h-12 md:h-14 w-auto transition-all duration-300 brightness-0 invert"
+            className="h-12 md:h-14 w-auto transition-all duration-300"
           />
         </a>
 
