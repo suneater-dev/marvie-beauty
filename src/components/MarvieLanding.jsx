@@ -110,6 +110,7 @@ import ContactForm from './ContactForm';
 import Footer from './Footer';
 import Modal from './Modal';
 import FloatingWhatsApp from './FloatingWhatsApp';
+import ChatBot from './ChatBot';
 
 // Custom hook for scroll animations using IntersectionObserver
 const useScrollAnimation = () => {
@@ -229,6 +230,9 @@ const MarvieLanding = () => {
 
       {/* Floating WhatsApp Button */}
       <FloatingWhatsApp />
+
+      {/* AI Chatbot */}
+      <ChatBot />
 
       {/* Booking Modal */}
       <Modal
