@@ -3,10 +3,10 @@
  *
  * AI-powered customer service chatbot for Marvie Beauty.
  * Features:
- * - Floating chat button (bottom-right, above WhatsApp)
- * - Chat window with message history
- * - Bilingual support (Indonesian/English)
- * - Inline booking form
+ * - Auto-opens after 4 seconds (once per session)
+ * - AI-generated greeting (multi-language)
+ * - Conversational booking flow (no form)
+ * - Booking token detection → sends to /api/booking
  * - Session-persisted messages
  * - Mobile-responsive (full-width on small screens)
  */
@@ -16,23 +16,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 const CHAT_API_URL = '/api/chat';
 const BOOKING_API_URL = '/api/booking';
 
-const TREATMENT_OPTIONS = [
-  'Facial Treatments',
-  'Acne Skin Treatment',
-  'Anti-Aging Solutions (Botox, Filler, Threadlift)',
-  'Face Contouring Solutions',
-  'Laser Solutions (Pico Laser, DPL Laser)',
-  'Body Contouring Solutions',
-  'Consultation Only',
-  'Other',
-];
+const FALLBACK_GREETING = "Hi! Welcome to Marvie Beauty Clinic ✨ I'm Marvie, your virtual assistant. I can help you in any language — just chat with me! How can I help you today?";
 
-const WELCOME_MESSAGE = {
-  role: 'assistant',
-  content:
-    'Hi! Welcome to Marvie Beauty Clinic \u2728\n\nI\'m here to help you learn about our treatments, answer questions, or book a consultation with Dr. Winayani.\n\nHow can I help you today?\n\nHalo! Selamat datang di Marvie Beauty Clinic \u2728\n\nSaya siap membantu Kakak untuk informasi treatment, menjawab pertanyaan, atau menjadwalkan konsultasi.\n\nAda yang bisa saya bantu?',
-  type: 'text',
-};
+const BOOKING_TOKEN_REGEX = /\[BOOKING_CONFIRMED:([\s\S]*?)\]/;
 
 // --- Sub-components ---
 
@@ -74,101 +60,7 @@ const MessageBubble = ({ message }) => {
   );
 };
 
-const BookingForm = ({ onSubmit, onCancel, isSubmitting }) => {
-  const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    treatment: '',
-    date: '',
-    notes: '',
-  });
-
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.name.trim() || !form.phone.trim()) return;
-    onSubmit(form);
-  };
-
-  // Min date = today
-  const today = new Date().toISOString().split('T')[0];
-
-  return (
-    <div className="mb-3 mx-2">
-      <div className="bg-white border border-accent/40 rounded-xl p-4 shadow-sm">
-        <p className="text-sm font-semibold text-primary mb-3">Book a Consultation</p>
-        <form onSubmit={handleSubmit} className="space-y-2.5">
-          <input
-            type="text"
-            name="name"
-            placeholder="Your name *"
-            value={form.name}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
-          />
-          <input
-            type="tel"
-            name="phone"
-            placeholder="WhatsApp number *"
-            value={form.phone}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
-          />
-          <select
-            name="treatment"
-            value={form.treatment}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent text-text"
-          >
-            <option value="">Select treatment interest</option>
-            {TREATMENT_OPTIONS.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-          <input
-            type="date"
-            name="date"
-            value={form.date}
-            onChange={handleChange}
-            min={today}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent text-text"
-          />
-          <textarea
-            name="notes"
-            placeholder="Additional notes (optional)"
-            value={form.notes}
-            onChange={handleChange}
-            rows={2}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent resize-none"
-          />
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Booking'}
-            </button>
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 text-sm text-muted border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-const BookingConfirmation = () => (
+const BookingConfirmation = ({ bookingData }) => (
   <div className="mb-3 mx-2">
     <div className="bg-green-50 border border-green-200 rounded-xl p-4">
       <div className="flex items-center gap-2 mb-2">
@@ -177,8 +69,13 @@ const BookingConfirmation = () => (
         </svg>
         <p className="text-sm font-semibold text-green-800">Booking Submitted!</p>
       </div>
-      <p className="text-sm text-green-700">
-        Our admin will contact you via WhatsApp to confirm your appointment. Thank you!
+      <div className="text-sm text-green-700 space-y-1">
+        {bookingData?.name && <p><span className="font-medium">Name:</span> {bookingData.name}</p>}
+        {bookingData?.treatment && <p><span className="font-medium">Treatment:</span> {bookingData.treatment}</p>}
+        {bookingData?.date && <p><span className="font-medium">Date:</span> {bookingData.date}</p>}
+      </div>
+      <p className="text-xs text-green-600 mt-2">
+        Our admin will contact you via WhatsApp to confirm.
       </p>
     </div>
   </div>
@@ -191,9 +88,8 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showBookingForm, setShowBookingForm] = useState(false);
-  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [greetingLoaded, setGreetingLoaded] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -202,14 +98,59 @@ const ChatBot = () => {
     try {
       const saved = sessionStorage.getItem('marvie-chat-messages');
       if (saved) {
-        setMessages(JSON.parse(saved));
-      } else {
-        setMessages([WELCOME_MESSAGE]);
+        const parsed = JSON.parse(saved);
+        if (parsed.length > 0) {
+          setMessages(parsed);
+          setGreetingLoaded(true);
+        }
       }
     } catch {
-      setMessages([WELCOME_MESSAGE]);
+      // sessionStorage unavailable
     }
   }, []);
+
+  // Auto-open chat after 4 seconds (once per session)
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem('marvie-chat-dismissed');
+    if (dismissed) return;
+
+    const timer = setTimeout(() => {
+      setIsChatOpen(true);
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Fetch AI greeting when chat opens for the first time with no messages
+  useEffect(() => {
+    if (!isChatOpen || greetingLoaded) return;
+
+    const fetchGreeting = async () => {
+      setGreetingLoaded(true);
+      setIsLoading(true);
+
+      try {
+        const response = await fetch(CHAT_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [] }),
+        });
+
+        if (!response.ok) throw new Error('Network error');
+
+        const data = await response.json();
+        const greeting = data.reply || FALLBACK_GREETING;
+
+        setMessages([{ role: 'assistant', content: greeting, type: 'text' }]);
+      } catch {
+        setMessages([{ role: 'assistant', content: FALLBACK_GREETING, type: 'text' }]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGreeting();
+  }, [isChatOpen, greetingLoaded]);
 
   // Save messages to sessionStorage when they change
   useEffect(() => {
@@ -225,7 +166,7 @@ const ChatBot = () => {
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading, showBookingForm]);
+  }, [messages, isLoading]);
 
   // Focus input when chat opens
   useEffect(() => {
@@ -233,6 +174,29 @@ const ChatBot = () => {
       setTimeout(() => inputRef.current?.focus(), 300);
     }
   }, [isChatOpen]);
+
+  // Process booking token from AI reply
+  const processBookingToken = useCallback(async (reply) => {
+    const match = reply.match(BOOKING_TOKEN_REGEX);
+    if (!match) return { cleanReply: reply, hasBooking: false };
+
+    const cleanReply = reply.replace(BOOKING_TOKEN_REGEX, '').trim();
+
+    try {
+      const bookingData = JSON.parse(match[1]);
+
+      // Send booking to API (non-blocking)
+      fetch(BOOKING_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
+      }).catch((err) => console.error('Booking API error:', err));
+
+      return { cleanReply, hasBooking: true, bookingData };
+    } catch {
+      return { cleanReply, hasBooking: false };
+    }
+  }, []);
 
   // Send message to AI
   const sendMessage = useCallback(async (userMessage) => {
@@ -261,24 +225,29 @@ const ChatBot = () => {
 
       if (data.error) throw new Error(data.error);
 
-      let reply = data.reply || 'Sorry, I could not process your request. Please try again.';
+      const rawReply = data.reply || 'Sorry, I could not process your request. Please try again.';
 
-      // Check if AI wants to show booking form
-      const shouldShowForm = reply.includes('[SHOW_BOOKING_FORM]');
-      reply = reply.replace(/\[SHOW_BOOKING_FORM\]/g, '').trim();
+      // Check for booking token
+      const { cleanReply, hasBooking, bookingData } = await processBookingToken(rawReply);
 
-      const assistantMsg = { role: 'assistant', content: reply, type: 'text' };
+      const assistantMsg = { role: 'assistant', content: cleanReply, type: 'text' };
       setMessages((prev) => [...prev, assistantMsg]);
 
-      if (shouldShowForm) {
-        setShowBookingForm(true);
+      if (hasBooking && bookingData) {
+        const confirmMsg = {
+          role: 'assistant',
+          type: 'booking-confirmation',
+          content: '',
+          bookingData,
+        };
+        setMessages((prev) => [...prev, confirmMsg]);
       }
 
       // Notify if chat is closed
       if (!isChatOpen) {
         setHasNewMessage(true);
       }
-    } catch (error) {
+    } catch {
       const errorMsg = {
         role: 'assistant',
         content: 'Sorry, I\'m having trouble connecting right now. Please try again or contact us directly via WhatsApp at +6287729138734.',
@@ -288,42 +257,7 @@ const ChatBot = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, isChatOpen]);
-
-  // Handle booking form submission
-  const handleBookingSubmit = async (formData) => {
-    setIsSubmittingBooking(true);
-
-    try {
-      const response = await fetch(BOOKING_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      setShowBookingForm(false);
-
-      // Add confirmation message
-      const confirmMsg = {
-        role: 'assistant',
-        content: data.message || 'Your booking request has been submitted! Our admin will contact you via WhatsApp to confirm your appointment.',
-        type: 'booking-confirmation',
-      };
-      setMessages((prev) => [...prev, confirmMsg]);
-    } catch {
-      const errorMsg = {
-        role: 'assistant',
-        content: 'Sorry, there was an issue submitting your booking. Please contact us directly via WhatsApp at +6287729138734.',
-        type: 'text',
-      };
-      setMessages((prev) => [...prev, errorMsg]);
-      setShowBookingForm(false);
-    } finally {
-      setIsSubmittingBooking(false);
-    }
-  };
+  }, [messages, isLoading, isChatOpen, processBookingToken]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -333,7 +267,13 @@ const ChatBot = () => {
   };
 
   const toggleChat = () => {
-    setIsChatOpen((prev) => !prev);
+    setIsChatOpen((prev) => {
+      const willClose = prev;
+      if (willClose) {
+        sessionStorage.setItem('marvie-chat-dismissed', 'true');
+      }
+      return !prev;
+    });
     setHasNewMessage(false);
   };
 
@@ -377,20 +317,11 @@ const ChatBot = () => {
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-0" style={{ scrollBehavior: 'smooth' }}>
             {messages.map((msg, idx) => (
               msg.type === 'booking-confirmation' ? (
-                <BookingConfirmation key={idx} />
+                <BookingConfirmation key={idx} bookingData={msg.bookingData} />
               ) : (
                 <MessageBubble key={idx} message={msg} />
               )
             ))}
-
-            {/* Booking Form */}
-            {showBookingForm && (
-              <BookingForm
-                onSubmit={handleBookingSubmit}
-                onCancel={() => setShowBookingForm(false)}
-                isSubmitting={isSubmittingBooking}
-              />
-            )}
 
             {/* Typing Indicator */}
             {isLoading && <TypingIndicator />}
