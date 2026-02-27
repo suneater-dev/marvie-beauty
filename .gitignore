@@ -29,8 +29,5 @@ yarn-error.log*
 *.swo
 *~
 
-# API secrets
-api/config.php
-
 # OS
 Thumbs.db

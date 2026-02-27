@@ -13,8 +13,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-const CHAT_API_URL = '/api/chat.php';
-const BOOKING_API_URL = '/api/booking.php';
+const CHAT_API_URL = '/api/chat';
+const BOOKING_API_URL = '/api/booking';
 
 const TREATMENT_OPTIONS = [
   'Facial Treatments',

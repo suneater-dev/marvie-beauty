@@ -1,41 +1,11 @@
-<?php
 /**
- * Chat API Endpoint for Marvie Beauty AI Chatbot
+ * Vercel Serverless Function - Chat API
  *
- * Receives messages from the frontend, adds the system prompt with
- * clinic knowledge, and proxies to OpenAI GPT-4o-mini.
+ * Proxies messages to OpenAI GPT-4o-mini with Marvie Beauty system prompt.
+ * Environment variable required: OPENAI_API_KEY
  */
 
-header('Content-Type: application/json; charset=UTF-8');
-
-// Handle preflight
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
-
-// Only allow POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Method not allowed']);
-    exit;
-}
-
-// Load config
-require_once __DIR__ . '/config.php';
-
-// Parse request body
-$input = json_decode(file_get_contents('php://input'), true);
-
-if (!$input || !isset($input['messages']) || !is_array($input['messages'])) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid request. Expected { messages: [...] }']);
-    exit;
-}
-
-// System prompt with all Marvie Beauty knowledge
-$systemPrompt = <<<'PROMPT'
-You are Marvie Beauty Clinic's friendly and professional customer service assistant. You help customers learn about treatments, answer questions, and guide them toward booking a consultation.
+const SYSTEM_PROMPT = `You are Marvie Beauty Clinic's friendly and professional customer service assistant. You help customers learn about treatments, answer questions, and guide them toward booking a consultation.
 
 ## CRITICAL RULES:
 - NEVER diagnose skin conditions or medical issues
@@ -108,82 +78,68 @@ Customer: "Muka saya berjerawat parah, harus pakai treatment apa?"
 Response: "Halo Kak! Untuk masalah jerawat, kami memiliki beberapa treatment yang mungkin bisa membantu seperti Acne Facial, Chemical Peeling, dan LED Light Therapy. Namun, kami sangat menyarankan untuk konsultasi langsung dengan dokter kami agar bisa mendapatkan penanganan yang tepat sesuai kondisi kulit Kakak. Mau saya bantu jadwalkan konsultasi? [SHOW_BOOKING_FORM]"
 
 Customer: "How much is Botox?"
-Response: "Hi! Botox pricing at Marvie Beauty depends on the treatment area and units needed, so it's best determined during a consultation with Dr. Winayani. Would you like to book a consultation? You can also reach us directly on WhatsApp at +6287729138734. [SHOW_BOOKING_FORM]"
-PROMPT;
+Response: "Hi! Botox pricing at Marvie Beauty depends on the treatment area and units needed, so it's best determined during a consultation with Dr. Winayani. Would you like to book a consultation? You can also reach us directly on WhatsApp at +6287729138734. [SHOW_BOOKING_FORM]"`;
 
-// Build messages array with system prompt
-$messages = [
-    ['role' => 'system', 'content' => $systemPrompt]
-];
+export default async function handler(req, res) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-// Add conversation history (limit to last 20 messages to manage tokens)
-$userMessages = array_slice($input['messages'], -20);
-foreach ($userMessages as $msg) {
-    if (isset($msg['role']) && isset($msg['content'])) {
-        $role = in_array($msg['role'], ['user', 'assistant']) ? $msg['role'] : 'user';
-        $messages[] = [
-            'role' => $role,
-            'content' => substr($msg['content'], 0, 2000) // Limit message length
-        ];
-    }
-}
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-// Call OpenAI API
-$response = callOpenAI($messages);
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-if (isset($response['error'])) {
-    http_response_code(500);
-    echo json_encode(['error' => $response['error']]);
-    exit;
-}
+  const { messages } = req.body || {};
 
-echo json_encode([
-    'reply' => $response['reply']
-]);
+  if (!messages || !Array.isArray(messages)) {
+    return res.status(400).json({ error: 'Invalid request. Expected { messages: [...] }' });
+  }
 
-/**
- * Call OpenAI Chat Completions API
- */
-function callOpenAI($messages) {
-    $url = 'https://api.openai.com/v1/chat/completions';
+  // Build messages with system prompt
+  const apiMessages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...messages.slice(-20).map((msg) => ({
+      role: ['user', 'assistant'].includes(msg.role) ? msg.role : 'user',
+      content: (msg.content || '').slice(0, 2000),
+    })),
+  ];
 
-    $data = [
-        'model' => 'gpt-4o-mini',
-        'messages' => $messages,
-        'max_tokens' => 500,
-        'temperature' => 0.7,
-    ];
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: apiMessages,
+        max_tokens: 500,
+        temperature: 0.7,
+      }),
+    });
 
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => json_encode($data),
-        CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . OPENAI_API_KEY,
-        ],
-        CURLOPT_TIMEOUT => 30,
-    ]);
-
-    $result = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $error = curl_error($ch);
-    curl_close($ch);
-
-    if ($error) {
-        return ['error' => 'Failed to connect to AI service'];
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('OpenAI API error:', response.status, errorData);
+      return res.status(500).json({ error: 'AI service returned an error' });
     }
 
-    if ($httpCode !== 200) {
-        return ['error' => 'AI service returned an error'];
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content;
+
+    if (!reply) {
+      return res.status(500).json({ error: 'Unexpected response from AI service' });
     }
 
-    $decoded = json_decode($result, true);
-
-    if (!isset($decoded['choices'][0]['message']['content'])) {
-        return ['error' => 'Unexpected response from AI service'];
-    }
-
-    return ['reply' => $decoded['choices'][0]['message']['content']];
+    return res.status(200).json({ reply });
+  } catch (error) {
+    console.error('Chat API error:', error);
+    return res.status(500).json({ error: 'Failed to connect to AI service' });
+  }
 }
