@@ -34,8 +34,16 @@ const FeatureGrid = () => {
               <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 tracking-wide uppercase">
                 Promo of<br />the Month
               </h3>
-              <button className="mt-4 px-6 py-2 border-2 border-white text-white uppercase text-xs tracking-wider
-                               hover:bg-white hover:text-primary transition-all duration-300">
+              <button
+                onClick={() => {
+                  const promoSection = document.querySelector('#promo');
+                  if (promoSection) {
+                    promoSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="mt-4 px-6 py-2 border-2 border-white text-white uppercase text-xs tracking-wider
+                               hover:bg-white hover:text-primary transition-all duration-300"
+              >
                 Check Promo Now
               </button>
             </div>

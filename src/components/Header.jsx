@@ -16,12 +16,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import Modal from './Modal';
+import { useNavigate } from 'react-router-dom';
 
 const Header = ({ onBookingClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isTreatmentMenuOpen, setIsTreatmentMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   // WhatsApp Business configuration
   const WHATSAPP_NUMBER = '+6287729138734';
@@ -55,17 +55,17 @@ const Header = ({ onBookingClick }) => {
     { label: 'Home', href: '#home' },
     { label: 'About', href: '#about' },
     { label: 'Services', href: '#services' },
-    { label: 'Menu', href: '#menu', isModal: true },
+    { label: 'Pricelist', href: '/pricelist', isPage: true },
     { label: 'Testimonials', href: '#testimonials' },
     { label: 'Contact', href: '#contact' },
   ];
 
-  const handleNavClick = (e, href, isModal = false) => {
+  const handleNavClick = (e, href, isPage = false) => {
     e.preventDefault();
     setIsMenuOpen(false);
 
-    if (isModal) {
-      setIsTreatmentMenuOpen(true);
+    if (isPage) {
+      navigate(href);
     } else {
       const element = document.querySelector(href);
       if (element) {
@@ -112,10 +112,10 @@ const Header = ({ onBookingClick }) => {
         {/* Desktop Navigation */}
         <ul className="hidden md:flex items-center space-x-8">
           {navItems.map((item) => (
-            <li key={item.href}>
+            <li key={item.label}>
               <a
                 href={item.href}
-                onClick={(e) => handleNavClick(e, item.href, item.isModal)}
+                onClick={(e) => handleNavClick(e, item.href, item.isPage)}
                 className={`font-medium transition-colors duration-300 cursor-pointer ${
                   isScrolled
                     ? 'text-white hover:text-accent'
@@ -199,10 +199,10 @@ const Header = ({ onBookingClick }) => {
       >
         <ul className="container-custom py-4 space-y-4">
           {navItems.map((item) => (
-            <li key={item.href} role="none">
+            <li key={item.label} role="none">
               <a
                 href={item.href}
-                onClick={(e) => handleNavClick(e, item.href, item.isModal)}
+                onClick={(e) => handleNavClick(e, item.href, item.isPage)}
                 className="block py-2 text-white hover:text-accent transition-colors duration-300 font-medium focus-visible:outline-2 focus-visible:outline-accent rounded cursor-pointer"
                 role="menuitem"
                 tabIndex={isMenuOpen ? 0 : -1}
@@ -226,55 +226,6 @@ const Header = ({ onBookingClick }) => {
           </li>
         </ul>
       </div>
-
-      {/* Treatment Menu Modal */}
-      <Modal
-        isOpen={isTreatmentMenuOpen}
-        onClose={() => setIsTreatmentMenuOpen(false)}
-        title="Full Treatment Menu & Pricelist"
-        size="lg"
-      >
-        <div className="space-y-6">
-          {/* Placeholder for PDF/Image - Replace with actual menu */}
-          <div className="bg-bg rounded-lg p-12 text-center border-2 border-dashed border-gray-300 min-h-[400px] flex flex-col items-center justify-center">
-            <svg
-              className="w-24 h-24 mx-auto mb-6 text-muted"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <p className="text-primary font-semibold text-xl mb-3">Treatment Menu Coming Soon</p>
-            <p className="text-muted text-sm max-w-md">
-              This will display the complete treatment menu with all services and pricing.
-              <br />
-              Add your menu image or PDF to display it here.
-            </p>
-          </div>
-
-          {/* Example: Uncomment when you have the actual image
-          <img
-            src="/assets/treatment-menu.jpg"
-            alt="Full Treatment Menu"
-            className="w-full rounded-lg shadow-lg"
-          />
-          */}
-
-          {/* Example: For PDF viewer
-          <iframe
-            src="/assets/treatment-menu.pdf"
-            className="w-full h-[700px] rounded-lg border"
-            title="Treatment Menu PDF"
-          />
-          */}
-        </div>
-      </Modal>
     </header>
   );
 };

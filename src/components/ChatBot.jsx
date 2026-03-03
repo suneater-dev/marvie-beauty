@@ -16,16 +16,43 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 const CHAT_API_URL = '/api/chat';
 const BOOKING_API_URL = '/api/booking';
 
-const FALLBACK_GREETING = "Hi! Welcome to Marvie Beauty Clinic ✨ I'm Marvie, your virtual assistant. I can help you in any language — just chat with me! How can I help you today?";
+const FALLBACK_GREETING = "Hi! Welcome to Marvie Beauty Clinic ✨ I'm Marvie, your virtual assistant. I can help you in any language, just chat with me! How can I help you today?";
 
 const BOOKING_TOKEN_REGEX = /\[BOOKING_CONFIRMED:([\s\S]*?)\]/;
 
 // --- Sub-components ---
 
+const ChatbotIcon = ({ className = 'w-5 h-5' }) => (
+  <svg className={className} viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    {/* Left antenna */}
+    <rect x="28" y="6" width="4" height="13" rx="2" />
+    <circle cx="30" cy="5" r="5" />
+    {/* Right antenna */}
+    <rect x="68" y="6" width="4" height="13" rx="2" />
+    <circle cx="70" cy="5" r="5" />
+    {/* Head (speech-bubble shape) with face cutout, eyes & mouth */}
+    <path
+      fillRule="evenodd"
+      d={[
+        // Outer head + speech-bubble tail (clockwise)
+        'M14 30 C14 20 26 14 50 14 C74 14 86 20 86 30 V60 C86 72 74 76 62 76 H36 L22 88 V76 C16 76 14 72 14 62 Z',
+        // Face cutout (inner rounded rect)
+        'M24 33 C24 27 28 24 35 24 H65 C72 24 76 27 76 33 V57 C76 63 72 66 65 66 H35 C28 66 24 63 24 57 Z',
+        // Left eye
+        'M38 38 A7 7 0 1 1 38 52 A7 7 0 1 1 38 38 Z',
+        // Right eye
+        'M62 38 A7 7 0 1 1 62 52 A7 7 0 1 1 62 38 Z',
+        // Mouth (open smile)
+        'M37 55 Q50 69 63 55 Q50 64 37 55 Z',
+      ].join(' ')}
+    />
+  </svg>
+);
+
 const TypingIndicator = () => (
   <div className="flex items-start gap-2 mb-3">
-    <div className="w-7 h-7 rounded-full bg-primary flex-shrink-0 flex items-center justify-center">
-      <span className="text-white text-xs font-bold">M</span>
+    <div className="w-7 h-7 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white">
+      <ChatbotIcon className="w-5 h-5" />
     </div>
     <div className="bg-white border border-gray-100 rounded-xl rounded-tl-sm px-4 py-3 shadow-sm">
       <div className="flex gap-1.5">
@@ -37,14 +64,68 @@ const TypingIndicator = () => (
   </div>
 );
 
+/** Render basic markdown (bold, lists) into React elements */
+const renderMarkdown = (text) => {
+  if (!text) return null;
+
+  const lines = text.split('\n');
+  const elements = [];
+  let listItems = [];
+
+  const flushList = () => {
+    if (listItems.length > 0) {
+      elements.push(
+        <ul key={`ul-${elements.length}`} className="list-disc list-inside my-1 space-y-0.5">
+          {listItems}
+        </ul>
+      );
+      listItems = [];
+    }
+  };
+
+  lines.forEach((line, i) => {
+    const listMatch = line.match(/^[-•]\s+(.*)/);
+    if (listMatch) {
+      listItems.push(<li key={`li-${i}`}>{parseBold(listMatch[1])}</li>);
+      return;
+    }
+
+    flushList();
+
+    if (line.trim() === '') {
+      elements.push(<br key={`br-${i}`} />);
+    } else {
+      elements.push(
+        <span key={`p-${i}`}>
+          {elements.length > 0 && lines[i - 1]?.trim() !== '' && !lines[i - 1]?.match(/^[-•]\s+/) ? '\n' : ''}
+          {parseBold(line)}
+        </span>
+      );
+    }
+  });
+
+  flushList();
+  return elements;
+};
+
+/** Turn **bold** into <strong> */
+const parseBold = (text) => {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    const boldMatch = part.match(/^\*\*([^*]+)\*\*$/);
+    if (boldMatch) return <strong key={i}>{boldMatch[1]}</strong>;
+    return part;
+  });
+};
+
 const MessageBubble = ({ message }) => {
   const isUser = message.role === 'user';
 
   return (
     <div className={`flex items-end gap-2 mb-3 ${isUser ? 'flex-row-reverse' : ''}`}>
       {!isUser && (
-        <div className="w-7 h-7 rounded-full bg-primary flex-shrink-0 flex items-center justify-center">
-          <span className="text-white text-xs font-bold">M</span>
+        <div className="w-7 h-7 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white">
+          <ChatbotIcon className="w-5 h-5" />
         </div>
       )}
       <div
@@ -54,7 +135,7 @@ const MessageBubble = ({ message }) => {
             : 'bg-white text-text border border-gray-100 rounded-xl rounded-tl-sm'
         }`}
       >
-        {message.content}
+        {isUser ? message.content : renderMarkdown(message.content)}
       </div>
     </div>
   );
@@ -71,6 +152,7 @@ const BookingConfirmation = ({ bookingData }) => (
       </div>
       <div className="text-sm text-green-700 space-y-1">
         {bookingData?.name && <p><span className="font-medium">Name:</span> {bookingData.name}</p>}
+        {bookingData?.email && <p><span className="font-medium">Email:</span> {bookingData.email}</p>}
         {bookingData?.treatment && <p><span className="font-medium">Treatment:</span> {bookingData.treatment}</p>}
         {bookingData?.date && <p><span className="font-medium">Date:</span> {bookingData.date}</p>}
       </div>
@@ -180,7 +262,11 @@ const ChatBot = () => {
     const match = reply.match(BOOKING_TOKEN_REGEX);
     if (!match) return { cleanReply: reply, hasBooking: false };
 
-    const cleanReply = reply.replace(BOOKING_TOKEN_REGEX, '').trim();
+    const cleanReply = reply
+      .replace(BOOKING_TOKEN_REGEX, '')
+      .replace(/here(?:'|')?s your booking (?:token|confirmation)[:\s]*/gi, '')
+      .replace(/booking token[:\s]*/gi, '')
+      .trim();
 
     try {
       const bookingData = JSON.parse(match[1]);
@@ -294,8 +380,8 @@ const ChatBot = () => {
           {/* Header */}
           <div className="bg-primary px-4 py-3 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
-                <span className="text-white text-sm font-bold">M</span>
+              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white">
+                <ChatbotIcon className="w-6 h-6" />
               </div>
               <div>
                 <p className="text-white font-semibold text-sm">Marvie Beauty</p>
@@ -361,7 +447,7 @@ const ChatBot = () => {
       {/* Floating Chat Button */}
       <button
         onClick={toggleChat}
-        className={`fixed bottom-24 right-4 sm:right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 ${
+        className={`fixed bottom-24 right-4 sm:right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 text-white ${
           isChatOpen
             ? 'bg-gray-500 hover:bg-gray-600'
             : 'bg-primary hover:bg-primary/90'
@@ -374,9 +460,7 @@ const ChatBot = () => {
           </svg>
         ) : (
           <>
-            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
+            <ChatbotIcon className="w-7 h-7" />
             {/* Notification badge */}
             {hasNewMessage && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white" />

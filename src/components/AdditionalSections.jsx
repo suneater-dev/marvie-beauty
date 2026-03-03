@@ -14,15 +14,28 @@ import React from 'react';
 
 // About Section
 export const About = () => {
+  const stats = [
+    { value: '2,000+', label: 'Clients Served' },
+    { value: '60+', label: 'Treatments' },
+    { value: '2', label: 'Locations' },
+  ];
+
   return (
     <section id="about" className="section-padding bg-bg-dark text-white">
       <div className="container-custom">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-accent text-sm tracking-widest uppercase mb-4">Our Story</p>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-wide uppercase">
-            About Marvie Beauty
-          </h2>
-          <div className="text-lg text-gray-300 leading-relaxed space-y-6 font-light max-w-3xl mx-auto text-center">
+        {/* Top: Two-column layout */}
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left — Heading */}
+          <div>
+            <p className="text-accent text-sm tracking-widest uppercase mb-4">Our Story</p>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-wide uppercase leading-tight">
+              About Marvie Beauty
+            </h2>
+            <div className="w-16 h-0.5 bg-accent mt-6" />
+          </div>
+
+          {/* Right — Story text */}
+          <div className="text-lg text-gray-300 leading-relaxed space-y-5 font-light">
             <p>
               Marvie Beauty Clinic is a modern aesthetic space specializing in skin treatments, face contouring, and body contouring. Our approach is safe, personalized, and results-focused, designed to elevate your natural beauty with refined precision.
             </p>
@@ -32,6 +45,18 @@ export const About = () => {
             <p>
               Located in Jakarta and Bali, Marvie Beauty Clinic offers seamless access to premium treatments and a serene, elevated experience.
             </p>
+          </div>
+        </div>
+
+        {/* Bottom: Stats bar */}
+        <div className="max-w-6xl mx-auto mt-14 pt-10 border-t border-white/10">
+          <div className="grid grid-cols-3 gap-6 text-center">
+            {stats.map((stat, i) => (
+              <div key={i}>
+                <p className="text-3xl md:text-4xl font-bold text-accent">{stat.value}</p>
+                <p className="text-sm text-gray-400 tracking-wider uppercase mt-1">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

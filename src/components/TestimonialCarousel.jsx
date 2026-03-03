@@ -85,14 +85,13 @@ const TestimonialCarousel = () => {
           {/* Testimonial Card */}
           <div className="bg-bg rounded-card shadow-card p-8 md:p-12">
             <div className="flex flex-col md:flex-row items-center gap-8">
-              {/* Client Photo */}
+              {/* Client Avatar */}
               <div className="flex-shrink-0">
-                <img
-                  src={testimonials[currentIndex].image}
-                  alt={testimonials[currentIndex].author}
-                  className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover shadow-lg"
-                  loading="lazy"
-                />
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-accent/20 border-2 border-accent/40 flex items-center justify-center shadow-lg">
+                  <span className="text-accent text-3xl md:text-4xl font-bold select-none">
+                    {testimonials[currentIndex].author.split(' ').map(n => n[0]).join('')}
+                  </span>
+                </div>
               </div>
 
               {/* Testimonial Content */}
@@ -117,7 +116,7 @@ const TestimonialCarousel = () => {
 
                 {/* Author */}
                 <cite className="text-muted font-semibold not-italic">
-                  — {testimonials[currentIndex].author}
+                  - {testimonials[currentIndex].author}
                 </cite>
               </div>
             </div>

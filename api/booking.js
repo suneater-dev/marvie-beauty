@@ -25,6 +25,7 @@ export default async function handler(req, res) {
   const {
     name,
     phone,
+    email,
     treatment,
     treatment_en,
     treatment_id,
@@ -46,6 +47,7 @@ export default async function handler(req, res) {
   console.log(`Timestamp: ${timestamp}`);
   console.log(`Name: ${name}`);
   console.log(`Phone: ${phone}`);
+  console.log(`Email: ${email || '-'}`);
   console.log(`Treatment: ${treatment || 'Not specified'}`);
   console.log(`Treatment (EN): ${treatment_en || '-'}`);
   console.log(`Treatment (ID): ${treatment_id || '-'}`);
@@ -67,6 +69,7 @@ export default async function handler(req, res) {
           timestamp,
           name,
           phone,
+          email: email || '',
           treatment: treatment || '',
           treatment_en: treatment_en || '',
           treatment_id: treatment_id || '',

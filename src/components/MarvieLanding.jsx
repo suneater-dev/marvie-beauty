@@ -111,6 +111,7 @@ import Footer from './Footer';
 import Modal from './Modal';
 import FloatingWhatsApp from './FloatingWhatsApp';
 import ChatBot from './ChatBot';
+import PromoSection from './PromoSection';
 
 // Custom hook for scroll animations using IntersectionObserver
 const useScrollAnimation = () => {
@@ -184,6 +185,11 @@ const MarvieLanding = () => {
         {/* Hero - no animation needed, it's above the fold */}
         <Hero onBookingClick={handleBookingClick} />
 
+        {/* Promo Section */}
+        <AnimatedSection>
+          <PromoSection />
+        </AnimatedSection>
+
         {/* About */}
         <AnimatedSection>
           <About />
@@ -214,10 +220,10 @@ const MarvieLanding = () => {
           <TestimonialCarousel />
         </AnimatedSection>
 
-        {/* Gallery */}
-        <AnimatedSection>
+        {/* Gallery - disabled until client provides images */}
+        {/* <AnimatedSection>
           <Gallery />
-        </AnimatedSection>
+        </AnimatedSection> */}
 
         {/* Contact Form */}
         <AnimatedSection>
