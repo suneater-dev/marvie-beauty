@@ -5,7 +5,43 @@ Marvie Beauty landing page - A production-ready, mobile-responsive, one-page web
 
 ## Recent Updates
 
-### SEO Optimization Implementation (Uncommitted)
+### Chatbot Refocus + Markdown Rendering + Token Fix (bae636e)
+**Date:** March 3, 2026
+
+#### Changes Made:
+1. **AI Chatbot Goal: Consultation Booking**
+   - Rewrote system prompt in `api/chat.js` — primary goal is now guiding every conversation toward booking a free in-person consultation with Dr. Winayani
+   - AI is a helpful guide, NOT a salesperson — listens, briefly mentions relevant treatments, then steers toward consultation
+   - Conversation approach rules: skin concerns → listen → mention 1-2 options → nudge consultation; promos/prices → answer then soft consultation invite; "what treatments?" → brief overview → consultation suggestion
+   - Booking flow defaults treatment to "Consultation" unless customer explicitly insists on a specific treatment
+   - AI told to never mention "token" or "booking token" to customers
+
+2. **Markdown Rendering in Chat Bubbles**
+   - Added `renderMarkdown()` and `parseBold()` functions in `ChatBot.jsx`
+   - Handles `**bold**` → `<strong>`, `- list items` → `<ul><li>`, newlines → `<br>`
+   - Only applied to assistant messages (user messages stay plain text)
+
+3. **Booking Token Leak Fix**
+   - AI was writing "Here's your booking token:" before the `[BOOKING_CONFIRMED:...]` token — after token stripping, that text remained visible
+   - Added regex cleanup in `processBookingToken()` to strip residual "booking token" text
+   - Strengthened system prompt: never mention tokens to the customer
+
+4. **Other Updates (accumulated from previous sessions)**
+   - Added promo images: `promo-lebaran.jpeg`, `promo-march-1.jpeg`, `promo-march-2.jpeg`
+   - New components: `PricelistPage.jsx`, `PromoSection.jsx`
+   - UI updates across Header, ServicesGrid, FeatureGrid, MarvieLanding, TestimonialCarousel, AdditionalSections
+   - Added `public/_redirects` for Netlify SPA routing
+
+#### Files Modified:
+- `api/chat.js` - System prompt rewrite (consultation-focused)
+- `src/components/ChatBot.jsx` - Markdown rendering, token leak fix, chatbot icon
+- `src/components/PricelistPage.jsx` (new) - Pricelist page component
+- `src/components/PromoSection.jsx` (new) - Promo section component
+- `public/assets/promo-*.jpeg` (new) - Promo images
+- `public/_redirects` (new) - Netlify SPA redirect
+- Various component updates across the app
+
+### SEO Optimization Implementation
 **Date:** December 11, 2025
 
 #### Changes Made:
@@ -84,15 +120,19 @@ Complete landing page implementation with:
 
 ```
 marvie-beauty/
+├── api/
+│   ├── chat.js              # AI chatbot serverless function (OpenAI GPT-4o-mini)
+│   └── booking.js           # Booking submission serverless function (Google Sheets)
 ├── public/
-│   ├── assets/              # Images (to be replaced with actual assets)
-│   │   ├── logo-placeholder.svg
-│   │   ├── hero-placeholder.jpg
+│   ├── _redirects            # Netlify SPA redirect rule
+│   ├── assets/               # Images
+│   │   ├── promo-lebaran.jpeg, promo-march-1.jpeg, promo-march-2.jpeg
+│   │   ├── logo-placeholder.svg, hero-placeholder.jpg
 │   │   ├── service-1.jpg to service-6.jpg
 │   │   ├── testimonial-1.jpg, testimonial-2.jpg
 │   │   └── gallery-1.jpg to gallery-4.jpg
 │   └── fonts/
-│       └── Zagora.ttf       # Custom font for hero headline
+│       └── Zagora.ttf        # Custom font for hero headline
 ├── src/
 │   ├── components/
 │   │   ├── MarvieLanding.jsx       # Main landing page component
@@ -100,15 +140,19 @@ marvie-beauty/
 │   │   ├── Hero.jsx                # Hero section (uses Zagora font)
 │   │   ├── AdditionalSections.jsx  # About, Why Choose Us (Our Promise), Gallery
 │   │   ├── ServicesGrid.jsx        # Services section
+│   │   ├── FeatureGrid.jsx         # Feature highlights grid
 │   │   ├── TestimonialCarousel.jsx # Testimonials carousel
-│   │   ├── ContactForm.jsx         # Contact form and info
+│   │   ├── ContactForm.jsx         # Contact info + Google Maps
+│   │   ├── ChatBot.jsx             # AI chatbot with markdown rendering
+│   │   ├── PricelistPage.jsx       # Full pricelist page
+│   │   ├── PromoSection.jsx        # Current promos section
 │   │   ├── Footer.jsx              # Footer with CTA
 │   │   ├── Modal.jsx               # Accessible modal component
 │   │   └── FloatingWhatsApp.jsx    # Floating WhatsApp button
 │   ├── fonts/
-│   │   └── Zagora.ttf       # Custom font (duplicate for flexibility)
+│   │   └── Zagora.ttf        # Custom font (duplicate for flexibility)
 │   ├── App.js
-│   └── index.css            # Global styles + Tailwind + @font-face
+│   └── index.css             # Global styles + Tailwind + @font-face
 └── Documentation/
     ├── README.md                    # Main documentation
     ├── ASSETS-GUIDE.md              # Image specifications
@@ -179,6 +223,16 @@ The Zagora font is implemented with:
 - Layout: 3 cards (top row) + 2 cards (bottom row, centered)
 - Located in: `src/components/AdditionalSections.jsx`
 - Part of the "Why Choose Us" section
+
+### AI Chatbot Architecture
+- **Backend**: `api/chat.js` — Vercel serverless function proxying to OpenAI GPT-4o-mini
+- **Frontend**: `src/components/ChatBot.jsx` — React chat widget with session persistence
+- **Booking**: `api/booking.js` — Sends confirmed bookings to Google Sheets
+- **Primary Goal**: Guide conversations toward booking a free in-person consultation with Dr. Winayani (not selling treatments)
+- **Booking Token**: AI outputs `[BOOKING_CONFIRMED:{...}]` at end of confirmation message; frontend strips it, parses JSON, sends to booking API, and shows a green confirmation card
+- **Markdown Rendering**: Assistant messages are parsed for `**bold**` and `- list` syntax via `renderMarkdown()` / `parseBold()` functions
+- **Token Leak Prevention**: System prompt forbids mentioning tokens; frontend regex strips residual "booking token" text
+- **Environment Variable**: `OPENAI_API_KEY` required
 
 ## Development Commands
 
@@ -251,13 +305,20 @@ npm run build
 
 ### For Customization:
 - `src/components/Hero.jsx` - Hero section, WhatsApp link, Zagora font usage
-- `src/components/ContactForm.jsx` - Contact form API, contact info, WhatsApp
+- `src/components/ContactForm.jsx` - Contact info, Google Maps embed, WhatsApp
 - `src/components/Footer.jsx` - Social media links
 - `src/components/ServicesGrid.jsx` - Service offerings
 - `src/components/TestimonialCarousel.jsx` - Customer testimonials
 - `src/components/FloatingWhatsApp.jsx` - WhatsApp button
+- `src/components/PricelistPage.jsx` - Full treatment pricelist
+- `src/components/PromoSection.jsx` - Current month's promos
 - `tailwind.config.js` - Color palette, theme customization
 - `public/index.html` - SEO meta tags, JSON-LD
+
+### For AI Chatbot:
+- `api/chat.js` - System prompt, AI personality, treatment data, promo data, booking flow rules
+- `api/booking.js` - Google Sheets integration for booking submissions
+- `src/components/ChatBot.jsx` - Chat UI, markdown rendering, booking token processing
 
 ### For Asset Management:
 - `public/assets/` - All images
@@ -447,9 +508,10 @@ npm run build
 
 ---
 
-**Last Updated:** December 11, 2025
-**Project Status:** Development - SEO optimized, ready for images & domain
+**Last Updated:** March 3, 2026
+**Project Status:** Development - AI chatbot consultation-focused, SEO optimized, ready for images & domain
 **Git Branch:** master
-**Latest Commit:** 7fe6109 - Add Zagora custom font and update Our Promise layout
-**Uncommitted Changes:** SEO optimization, copywriting updates, WhatsApp integration, contact form removal
+**Latest Commit:** bae636e - Refocus chatbot on consultation booking, add markdown rendering, fix token leak
+**Uncommitted Changes:** None
 **SEO Status:** ✅ On-page SEO complete | ⚠️ Need: domain URL, Google Business Profile, real images
+**Chatbot Status:** ✅ Consultation-focused | ✅ Markdown rendering | ✅ Token leak fixed | March 2026 promos loaded
