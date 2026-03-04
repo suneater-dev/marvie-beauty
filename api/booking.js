@@ -62,7 +62,7 @@ export default async function handler(req, res) {
   const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
   if (webhookUrl) {
     try {
-      await fetch(webhookUrl, {
+      const webhookRes = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -80,7 +80,11 @@ export default async function handler(req, res) {
           language: language || '',
         }),
       });
-      console.log('Booking sent to Google Sheets successfully');
+      console.log(`Google Sheets webhook response: ${webhookRes.status}`);
+      if (!webhookRes.ok) {
+        const body = await webhookRes.text();
+        console.error('Google Sheets webhook non-200 response:', body);
+      }
     } catch (error) {
       console.error('Google Sheets webhook error (non-blocking):', error.message);
     }
